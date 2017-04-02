@@ -1,0 +1,14 @@
+{
+  "name": "mogo_db_tut_5",
+  "version": "1.0.0",
+  "description": "todo api",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Shashank",
+  "license": "ISC",
+  "dependencies": {
+    "mongodb": "^2.2.25"
+  }
+}
