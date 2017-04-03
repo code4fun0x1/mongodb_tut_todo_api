@@ -1,69 +1,30 @@
-var mongoose = require('mongoose');
-//set up promise for mongoose
-mongoose.Promise = global.Promise;
-//give it the conneection asynchonouusly
-//but mongoose handle everything
-mongoose.connect('mongodb://localhost:27017/TodoApp');
+var express = require('express');
+var bodyParser = require('body-parser');
 
-//create model
-var Todo = mongoose.model('Todo',{
-  text:{
-    type:String,
-    required:true,
-    minlength:1,
-    trim:true
-  },
-  completed:{
-    type:Boolean,
-    default:false
-  },
-  completedAt:{
-    type:Number,
-    default:null
-  }
-});
-//craete a object from model and save it
-// var newTodo = new Todo({
-//   text:'Cook Dinner'
-// });
-// newTodo.save().then((doc)=>{
-//   console.log('Saved to database');
-//   console.log(doc);
-// },(e)=>{
-//   console.log('unable to save',e);
-// });
+//Object destructuring
+var {mongoose}=require('./db/mongoose');
+var {Todo}=require('./models/todo');
+var {User}=require('./models/user');
 
-//second object
-// var secondTodo = new Todo({
-//   text:'Paying Game',
-//   completed:false,
-//   completedAt:123
-// });
-//
-// secondTodo.save().then((doc)=>{
-//   console.log('Saved Successful');
-//   console.log(doc);
-// },(e)=>{
-//   console.log(e);
-// });
+var app=express();
 
+//set upt he bodyParser middleware
 
-//set up user
-//email-required-trim-settype-minleenth=1
+app.use(bodyParser.json());
 
-var UserModel = mongoose.model('UserModel',{
-  email:{
-    type:String,
-    required:true,
-    minlength:1,
-    trim:true,
-  }
+//to create new todos
+app.post('/todos',(req,res)=>{
+ //console.log(req.body);
+ var todo = new Todo({
+   text:req.body.text
+ });
+ todo.save().then((doc)=>{
+   res.send(doc);
+ },(err)=>{
+   res.status(400).send(err);
+ });
 });
 
-var newUser=new UserModel({
-  email:'abc@abc.com'
-});
-newUser.save().then((doc)=>{
-  console.log('Saved Succefully');
-  console.log(doc);
-},(e)=>{console.log(e);});
+app.listen(3000,()=>{
+  console.log("Server Started");
+})
