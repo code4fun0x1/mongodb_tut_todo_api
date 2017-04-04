@@ -1,13 +1,16 @@
 const expect = require('expect');
 const request = require('supertest');
+const {ObjectID} = require('mongodb');
 
 //../ to go back a direectory
 const {app} = require('./../server');
 const {Todo} = require('./../models/todo');
 
+//we are specifing id manually because
+//we have to test todo/:id api for which we need the id
 const todos=[
-  {text:"test 1 todos"},
-  {text:"test 2 todos"}
+  {_id:new ObjectID(),text:"test 1 todos"},
+  {_id:new ObjectID(),text:"test 2 todos"}
 ];
 
 //insertMany() mongoose to insert many item in db
@@ -93,4 +96,32 @@ describe('GET/todos',()=>{
     })
     .end(done);
   });
+});
+
+describe('GET/todos/:id',()=>{
+  it('should return todo doc',(done)=>{
+    request(app)
+    .get(`/todos/${todos[0]._id.toHexString()}`)
+    .expect(200)
+    .expect((res)=>{
+      expect(res.body.todo.text).toBe(todos[0].text);
+    })
+    .end(done);
+  });
+
+  it('should return 404 if todo not found',(done)=>{
+    var hexId=new ObjectID().toHexString();
+    request(app)
+    .get(`/todos/${hexId}`)
+    .expect(404)
+    .end(done);
+  });
+
+  it('should return 404 if non objectId',(done)=>{
+    request(app)
+    .get(`/todos/111`)
+    .expect(404)
+    .end(done);
+  });
+
 });
