@@ -1,4 +1,7 @@
 var mongoose=require('mongoose');
+
+//mongoose.model('User'
+//here User defines the actual db collection
 var User = mongoose.model('User',{
   email:{
     type:String,
@@ -8,8 +11,8 @@ var User = mongoose.model('User',{
   }
 });
 
-
-// var newUser=new UserModel({
+//
+// var newUser=new User({
 //   email:'abc@abc.com'
 // });
 // newUser.save().then((doc)=>{
