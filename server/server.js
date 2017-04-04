@@ -26,6 +26,16 @@ app.post('/todos',(req,res)=>{
  });
 });
 
+//reetrun all the todos
+app.get('/todos',(req,res)=>{
+  Todo.find().then((todos)=>{
+    //send as an object
+    res.send({todos});
+  },(e)=>{
+    res.status(400).send(e);
+  });
+});
+
 app.listen(3000,()=>{
   console.log("Server Started");
 });
