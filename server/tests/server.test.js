@@ -7,7 +7,9 @@ const {Todo} = require('./../models/todo');
 
 //empty database before every teest
 beforeEach((done)=>{
-  Todo.remove({}).then(()=>done());
+  Todo.remove({}).then(()=>{
+    done();
+  });
 });
 
 describe('POST/todos',()=>{
@@ -32,15 +34,41 @@ describe('POST/todos',()=>{
         expect(todos.length).toBe(1);
         expect(todos[0].text).toBe(text);
         done();
-      }).catch((e)=>{
-        done(e);
-      });
+      }).catch((e)=>done(e));
 
     });
    });
 
    //test case for the bad request
+// it('should not create a new todos',(done)=>{
+//   request(app)
+//   .post('/todos')
+//   .send({})
+//   .expect(400)
+//   .expect((res)=>{
+//     expect(res.body.message).toBe("Todo validation failed");
+//   })
+//   .end(done);
 
-
-
+//test for bad request with database length check-0
+it('should not create a new todos',(done)=>{
+  request(app)
+  .post('/todos')
+  .send({})
+  .expect(400)
+  .expect((res)=>{
+    expect(res.body.message).toBe("Todo validation failed");
+  })
+  .end((err,res)=>{
+    if(err){
+      return done(err);
+    }
+    Todo.find().then((todos)=>{
+      expect(todos.length).toBe(0);
+      done();
+    }).catch((e)=>{
+      done(e);
+    });
+  });
+});
 });
