@@ -8,6 +8,7 @@ var {Todo}=require('./models/todo');
 var {User}=require('./models/user');
 
 var app=express();
+const port = process.env.PORT || 3000;
 
 //set upt he bodyParser middleware
 
@@ -55,8 +56,8 @@ app.get('/todos/:id',(req,res)=>{
 });
 
 
-app.listen(3000,()=>{
-  console.log("Server Started");
+app.listen(port,()=>{
+  console.log(`Server Started at ${port}`);
 });
 
 module.exports={app};
