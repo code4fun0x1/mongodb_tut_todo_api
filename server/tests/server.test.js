@@ -10,7 +10,11 @@ const {Todo} = require('./../models/todo');
 //we have to test todo/:id api for which we need the id
 const todos=[
   {_id:new ObjectID(),text:"test 1 todos"},
-  {_id:new ObjectID(),text:"test 2 todos"}
+  {_id:new ObjectID(),
+    text:"test 2 todos",
+    completed:true,
+    completedAt:333
+  }
 ];
 
 //insertMany() mongoose to insert many item in db
@@ -165,3 +169,70 @@ describe('DELETE / todos /:id',()=>{
     });
 
 });
+
+describe('GET/todos/:id',()=>{
+  it('should return todo doc',(done)=>{
+    request(app)
+    .get(`/todos/${todos[0]._id.toHexString()}`)
+    .expect(200)
+    .expect((res)=>{
+      expect(res.body.todo.text).toBe(todos[0].text);
+    })
+    .end(done);
+  });
+
+  it('should return 404 if todo not found',(done)=>{
+    var hexId=new ObjectID().toHexString();
+    request(app)
+    .get(`/todos/${hexId}`)
+    .expect(404)
+    .end(done);
+  });
+
+  it('should return 404 if non objectId',(done)=>{
+    request(app)
+    .get(`/todos/111`)
+    .expect(404)
+    .end(done);
+  });
+
+});
+
+describe('UPDATE / todos /:id',()=>{
+  it('should update a todo',(done)=>{
+    var hexId=todos[0]._id.toHexString();
+    var text='unit test updated text';
+    request(app)
+    .patch(`/todos/${hexId}`)
+    .send({
+      text:text,
+      completed:true
+    })
+    .expect(200)
+    .expect((res)=>{
+      expect(res.body.todo.text).toBe(text);
+      expect(res.body.todo.completed).toBe(true);
+      expect(res.body.todo.completedAt).toBeA('number');
+    })
+    .end(done);
+  });
+
+  it('should clear completedAt when todo is not completed',(done)=>{
+    var hexId=todos[1]._id.toHexString();
+    var text='unit test updated text for false';
+    request(app)
+    .patch(`/todos/${hexId}`)
+    .send({
+      text:text,
+      completed:false
+    })
+    .expect(200)
+    .expect((res)=>{
+      expect(res.body.todo.text).toBe(text);
+      expect(res.body.todo.completed).toBe(false);
+      expect(res.body.todo.completedAt).toNotExist();
+    })
+    .end(done);
+  });
+
+  });

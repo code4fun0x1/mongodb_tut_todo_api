@@ -13,7 +13,7 @@ const {User} = require('./../server/models/user');
 // Todo.remove({}).then(()=>{
 //   consoole.log('Removed all document');
 // });
-//
+//3
 // //deleted item gets returned
 // Todo.findOneAndRemove({text:'play games'}).then((todo)=>{
 //   console.log(todo);
