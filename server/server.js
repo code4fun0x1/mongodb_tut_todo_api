@@ -113,6 +113,26 @@ app.patch('/todos/:id',(req,res)=>{
 });
 
 
+app.post('/users',(req,res)=>{
+   var body= _.pick(req.body,['email','password']);
+   var user= new User(body);
+
+
+
+   user.save().then(()=>{
+    //usser.generateAuthToken() returns apromise so we
+    //can chain acustom then() call for custom logiic
+     return user.generateAuthToken();
+     //res.send(user);
+   }).then((token)=>{
+     //x-auth means custom header and not standard http header
+     res.header('x-auth',token).send(user);
+   }).catch((err)=>{
+     res.status(400).send(err);
+   });
+});
+
+
 app.listen(port,()=>{
   console.log(`Server Started at ${port}`);
 });

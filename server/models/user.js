@@ -1,15 +1,66 @@
-var mongoose=require('mongoose');
+const mongoose=require('mongoose');
+const validator=require('validator');
+const jwt= require('jsonwebtoken');
+const _ = require('lodash');
 
+var UserSchema=new mongoose.Schema({
+    email:{
+      type:String,
+      required:true,
+      minlength:1,
+      trim:true,
+      unique:true,
+      validate:{
+        validator:(value)=>{
+          //returns true or false
+          return validator.isEmail(value);
+        },
+        message:'{VALUE} is not a valid email'
+      }
+    },
+    password:{
+      type:String,
+      require:true,
+      minlength:6
+    },
+    tokens:[{
+      access:{
+        type:String,
+        require:true
+      },
+      token:{
+        type:String,
+        require:true
+      }
+    }]
+});
+
+//to limit the data send in the response
+//this method defines the data that is send back to server.js
+UserSchema.methods.toJSON = function(){
+  var user = this;
+  var userObject = user.toObject();
+  return __.pick(userObject,['_id','email']);
+};
+
+//we are adding a instance method to individual user object
+UserSchema.methods.generateAuthToken = function(){
+  //function() binds to this keyword
+  //'this' is neeed to get individual users
+  var user = this;
+  var access = 'auth';
+  var token = jwt.sign({_id:user._id.toHexString(),access:access} , 'abc123').toString();
+  user.tokens.push({access,token});
+  //we are returning a promise so that seerver.js can chain on a then() call
+  //for custom logic
+  return user.save().then(()=>{
+    //this will be retuurned as the argument to the next chained promise
+    return token;
+  });
+};
 //mongoose.model('User'
 //here User defines the actual db collection
-var User = mongoose.model('User',{
-  email:{
-    type:String,
-    required:true,
-    minlength:1,
-    trim:true,
-  }
-});
+var User = mongoose.model('User',UserSchema);
 
 //
 // var newUser=new User({
