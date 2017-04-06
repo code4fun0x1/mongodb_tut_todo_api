@@ -1,5 +1,6 @@
-var express = require('express');
-var bodyParser = require('body-parser');
+const _=require('lodash');
+const express = require('express');
+const bodyParser = require('body-parser');
 const {ObjectID} = require('mongodb');
 
 //Object destructuring
@@ -69,6 +70,34 @@ app.delete('/todos/:id',(req,res)=>{
     res.status(400).send();
   });
 
+});
+
+//for updating todos
+app.patch('/todos/:id',(req,res)=>{
+  var id=req.params.id;
+  //for validation purpose we use lodash
+  //there are property we dont want user to updaate
+  //ex: completed=true shouuld be done by the Server
+  //to extract certain property {key;value} from 'req' parameter
+  //we are using lodash to extract only desired property
+  var body=_.pick(req.body,['text','completed']);
+
+  if(_.isBoolean(body.completed) && body.completed){
+    body.completedAt = new Date().getTime();
+  }else{
+    body.completed=false;
+    //to delete a value simply make it null
+    body.completedAt=null;
+  }
+  Todo.findByIdAndUpdate(id,{$set:body},{new:true}).then((todo)=>{
+    if(!todo){
+    return res.status(404).send();
+    }
+    res.status(200).send({todo});
+
+  }).catch((err)=>{
+    res.status(400).send();
+  });
 });
 
 
