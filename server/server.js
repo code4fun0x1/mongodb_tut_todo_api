@@ -19,7 +19,7 @@ const {ObjectID} = require('mongodb');
 var {mongoose}=require('./db/mongoose');
 var {Todo}=require('./models/todo');
 var {User}=require('./models/user');
-
+var {authenticate} = require('./middleware/authenticate');
 var app=express();
 const port = process.env.PORT || 3000;
 
@@ -130,6 +130,13 @@ app.post('/users',(req,res)=>{
    }).catch((err)=>{
      res.status(400).send(err);
    });
+});
+
+
+//test authenticated route
+app.get('/users/me',authenticate,(req,res)=>{
+  //get the x-auth header from req object
+  res.send(req.user);
 });
 
 

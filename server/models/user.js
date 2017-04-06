@@ -40,7 +40,7 @@ var UserSchema=new mongoose.Schema({
 UserSchema.methods.toJSON = function(){
   var user = this;
   var userObject = user.toObject();
-  return __.pick(userObject,['_id','email']);
+  return _.pick(userObject,['_id','email']);
 };
 
 //we are adding a instance method to individual user object
@@ -58,6 +58,28 @@ UserSchema.methods.generateAuthToken = function(){
     return token;
   });
 };
+//for Model method which do task common to all user
+UserSchema.statics.findByToken=function(token){
+  //model reference
+  var User = this;
+  var decoded;//store decoded jwt
+  try{
+    decoded = jwt.verify(token,'abc123');
+  }catch(e){
+    //return a promise so that success case never occure
+    return Promise.reject();
+  }
+
+//mongoose functions to search
+//return the promise for chaining in server.js
+  return User.findOne({
+    '_id':decoded._id,
+    'tokens.token':token,
+    'tokens.access':'auth'
+  });
+
+};
+
 //mongoose.model('User'
 //here User defines the actual db collection
 var User = mongoose.model('User',UserSchema);
