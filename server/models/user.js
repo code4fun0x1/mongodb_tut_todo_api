@@ -2,6 +2,7 @@ const mongoose=require('mongoose');
 const validator=require('validator');
 const jwt= require('jsonwebtoken');
 const _ = require('lodash');
+const bcrypt= require('bcryptjs');
 
 var UserSchema=new mongoose.Schema({
     email:{
@@ -20,7 +21,7 @@ var UserSchema=new mongoose.Schema({
     },
     password:{
       type:String,
-      required:true,
+      require:true,
       minlength:6
     },
     tokens:[{
@@ -79,6 +80,22 @@ UserSchema.statics.findByToken=function(token){
   });
 
 };
+//we are using a mongoose middleware
+//dont use arrow function cz we need 'this' for user
+UserSchema.pre('save',function(next){
+  var user=this;
+  if(user.isModified('password')){
+    bcrypt.genSalt(10,(err,salt)=>{
+      bcrypt.hash(user.password,salt, (err,hash)=>{
+        user.password=hash;
+        next();
+      });
+    });
+  }else{
+    next();
+  }
+});
+
 
 //mongoose.model('User'
 //here User defines the actual db collection
