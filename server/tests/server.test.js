@@ -5,29 +5,40 @@ const {ObjectID} = require('mongodb');
 //../ to go back a direectory
 const {app} = require('./../server');
 const {Todo} = require('./../models/todo');
+const {User} = require('./../models/user');
+const {todos,populateTodos,users,populateUsers} = require('./seed/seed');
 
 //we are specifing id manually because
 //we have to test todo/:id api for which we need the id
-const todos=[
-  {_id:new ObjectID(),text:"test 1 todos"},
-  {_id:new ObjectID(),
-    text:"test 2 todos",
-    completed:true,
-    completedAt:333
-  }
-];
+// const todos=[
+//   {_id:new ObjectID(),text:"test 1 todos"},
+//   {_id:new ObjectID(),
+//     text:"test 2 todos",
+//     completed:true,
+//     completedAt:333
+//   }
+// ];
+//
+// //insertMany() mongoose to insert many item in db
+//
+// //empty database before every teest
+// beforeEach((done)=>{
+//   Todo.remove({}).then(()=>{
+//     return Todo.insertMany(todos); //this will return a promise
+//     done();
+//   }).then(()=>{done();});
+// });
 
-//insertMany() mongoose to insert many item in db
+//AFTER RE-STRUCTURING seed
 
-//empty database before every teest
-beforeEach((done)=>{
-  Todo.remove({}).then(()=>{
-    return Todo.insertMany(todos); //this will return a promise
-    done();
-  }).then(()=>{done();});
-});
+//middleware
+
+
 
 describe('POST/todos',()=>{
+  beforeEach(populateTodos);
+
+
   it('should create new todos',(done)=>{
     var text = 'Test todo test';
 
@@ -91,6 +102,8 @@ it('should not create a new todos',(done)=>{
 
 //test case for get/all todos
 describe('GET/todos',()=>{
+  beforeEach(populateTodos);
+
   it('should get all todos',(done)=>{
     request(app)
     .get('/todos')
@@ -103,6 +116,8 @@ describe('GET/todos',()=>{
 });
 
 describe('GET/todos/:id',()=>{
+  beforeEach(populateTodos);
+
   it('should return todo doc',(done)=>{
     request(app)
     .get(`/todos/${todos[0]._id.toHexString()}`)
@@ -131,6 +146,8 @@ describe('GET/todos/:id',()=>{
 });
 
 describe('DELETE / todos /:id',()=>{
+  beforeEach(populateTodos);
+
   it('should delete a todo',(done)=>{
     var hexId=todos[0]._id.toHexString();
     request(app)
@@ -171,6 +188,8 @@ describe('DELETE / todos /:id',()=>{
 });
 
 describe('GET/todos/:id',()=>{
+  beforeEach(populateTodos);
+
   it('should return todo doc',(done)=>{
     request(app)
     .get(`/todos/${todos[0]._id.toHexString()}`)
@@ -199,6 +218,8 @@ describe('GET/todos/:id',()=>{
 });
 
 describe('UPDATE / todos /:id',()=>{
+  beforeEach(populateTodos);
+
   it('should update a todo',(done)=>{
     var hexId=todos[0]._id.toHexString();
     var text='unit test updated text';
@@ -235,4 +256,24 @@ describe('UPDATE / todos /:id',()=>{
     .end(done);
   });
 
+  });
+
+  describe('GET /users /me',()=>{
+    beforeEach(populateUsers);
+
+    it('should return user if authneticated',(done)=>{
+      request(app)
+      .get('/users/me')
+      .set('x-auth',users[0].tokens[0].token)
+      .expect(200)
+      .expect((res)=>{
+        expect(res.body._id).toBe(users[0]._id.toHexString());
+        expect(res.body.email).toBe(users[0].email);
+      })
+      .end(done);
+    });
+
+    it('should return 401 if not authenticated',(done)=>{
+
+    });
   });
