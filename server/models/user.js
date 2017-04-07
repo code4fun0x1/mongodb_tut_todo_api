@@ -59,6 +59,20 @@ UserSchema.methods.generateAuthToken = function(){
     return token;
   });
 };
+
+UserSchema.methods.removeToken = function(token){
+  var user = this;
+  return user.update({
+    //first it will pull out from 'tokens'
+    //it pulls any object which matches
+    $pull:{
+      tokens:{
+        token:token
+      }
+    }
+  });
+};
+
 //for Model method which do task common to all user
 UserSchema.statics.findByToken=function(token){
   //model reference
